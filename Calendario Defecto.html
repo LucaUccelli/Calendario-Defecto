@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de Producción — Defecto</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --black: #0D0D0D;
+    --white: #FFFFFF;
+    --gray-100: #F5F5F3;
+    --gray-200: #E8E8E5;
+    --gray-400: #AEADA8;
+    --gray-600: #6B6A66;
+    --sante-color: #2A6EBB;
+    --sante-light: #EBF2FB;
+    --sante-mid: #BFCFE8;
+    --ff-color: #E04F72;
+    --ff-light: #FCEEF2;
+    --ff-mid: #F4BBCA;
+    --both-color: #7B5EA7;
+    --both-light: #F0EBF8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    padding: 48px 60px 36px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .header-left {}
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--ff-color);
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+  }
+
+  header h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .month-nav button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .month-nav button:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .month-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    min-width: 160px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  /* LEGEND */
+  .legend {
+    padding: 20px 60px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* CALENDAR GRID */
+  .calendar-wrapper {
+    padding: 36px 60px 60px;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 1px;
+  }
+
+  .weekday {
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+
+  .weekday.weekend { color: rgba(255,255,255,0.12); }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .day-cell {
+    background: #141414;
+    min-height: 110px;
+    padding: 10px;
+    position: relative;
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .day-cell.other-month {
+    background: #0f0f0f;
+    opacity: 0.4;
+  }
+
+  .day-cell.weekend { background: #111111; }
+
+  .day-cell.today {
+    background: #1a1a1a;
+  }
+
+  .day-cell.has-events {
+    cursor: pointer;
+  }
+
+  .day-cell.has-events:hover {
+    background: #1e1e1e;
+  }
+
+  .day-number {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .day-cell.today .day-number {
+    color: var(--ff-color);
+    font-weight: 600;
+  }
+
+  .day-cell.other-month .day-number { color: rgba(255,255,255,0.1); }
+
+  /* EVENT CHIPS */
+  .event-chip {
+    display: block;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .event-chip:hover { opacity: 0.8; }
+
+  .chip-sante {
+    background: var(--sante-light);
+    color: var(--sante-color);
+    border-left: 2px solid var(--sante-color);
+  }
+
+  .chip-ff {
+    background: var(--ff-light);
+    color: #c03060;
+    border-left: 2px solid var(--ff-color);
+  }
+
+  .chip-both {
+    background: var(--both-light);
+    color: var(--both-color);
+    border-left: 2px solid var(--both-color);
+  }
+
+  .chip-internal {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.45);
+    border-left: 2px solid rgba(255,255,255,0.2);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #1A1A1A;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .modal-date {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .modal-close {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: rgba(255,255,255,0.5);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
+  }
+
+  .modal-body { padding: 20px 24px 24px; }
+
+  .modal-event {
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .modal-event:last-child { margin-bottom: 0; }
+
+  .modal-event.sante { background: var(--sante-light); border-left: 3px solid var(--sante-color); }
+  .modal-event.ff { background: var(--ff-light); border-left: 3px solid var(--ff-color); }
+  .modal-event.both { background: var(--both-light); border-left: 3px solid var(--both-color); }
+  .modal-event.internal { background: rgba(255,255,255,0.04); border-left: 3px solid rgba(255,255,255,0.15); }
+
+  .modal-event-client {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .sante .modal-event-client { color: var(--sante-color); }
+  .ff .modal-event-client { color: var(--ff-color); }
+  .both .modal-event-client { color: var(--both-color); }
+  .internal .modal-event-client { color: rgba(255,255,255,0.3); }
+
+  .modal-event-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .sante .modal-event-title { color: #1a4a7a; }
+  .ff .modal-event-title { color: #8a1a35; }
+  .both .modal-event-title { color: #4a2a6a; }
+  .internal .modal-event-title { color: rgba(255,255,255,0.7); }
+
+  .modal-event-desc {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .sante .modal-event-desc { color: #2a5a9a; }
+  .ff .modal-event-desc { color: #a03050; }
+  .both .modal-event-desc { color: #5a3a8a; }
+  .internal .modal-event-desc { color: rgba(255,255,255,0.4); }
+
+  /* SUMMARY STRIP */
+  .summary-strip {
+    margin: 0 60px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .summary-card {
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .summary-card.sante { background: rgba(42,110,187,0.1); border: 1px solid rgba(42,110,187,0.2); }
+  .summary-card.ff { background: rgba(224,79,114,0.1); border: 1px solid rgba(224,79,114,0.2); }
+
+  .summary-client {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .sante .summary-client { color: var(--sante-color); }
+  .ff .summary-client { color: var(--ff-color); }
+
+  .summary-items { list-style: none; }
+
+  .summary-items li {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    gap: 8px;
+  }
+
+  .summary-items li:last-child { border-bottom: none; }
+
+  .summary-items .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .sante .dot { background: var(--sante-color); }
+  .ff .dot { background: var(--ff-color); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-brand {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  @media (max-width: 768px) {
+    header { padding: 32px 20px 24px; flex-direction: column; align-items: flex-start; }
+    .legend { padding: 16px 20px; flex-wrap: wrap; gap: 16px; }
+    .calendar-wrapper { padding: 20px 20px 40px; }
+    .summary-strip { margin: 0 20px 40px; grid-template-columns: 1fr; }
+    footer { padding: 16px 20px; flex-direction: column; gap: 8px; text-align: center; }
+    .day-cell { min-height: 70px; padding: 6px; }
+    .event-chip { font-size: 9px; padding: 2px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark"></div>
+    <h1>Defecto — Plan de producción</h1>
+    <h2>Calendario de Entregables</h2>
+  </div>
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">&#8592;</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button onclick="changeMonth(1)">&#8594;</button>
+  </div>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--sante-color)"></div>
+    Santé
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--ff-color)"></div>
+    Friends & Family
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--both-color)"></div>
+    Ambos clientes
+  </div>
+</div>
+
+<!-- BANNER MAYO ESPECIAL -->
+<div id="mayBanner" style="display:none; margin: 0 60px 0; padding: 14px 20px; background: rgba(224,79,114,0.08); border: 1px solid rgba(224,79,114,0.2); border-radius: 8px; gap: 12px; align-items: center;">
+  <div style="width:8px;height:8px;background:var(--ff-color);border-radius:50%;flex-shrink:0;"></div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">
+    <strong style="color:var(--ff-color);">Mayo 2026 — Mes de arranque.</strong>
+    El ciclo comienza el 6 de mayo (firma Santé). Los días 1–5 están fuera del ciclo de producción. A partir de junio el calendario corre en su estructura regular.
+  </div>
+</div>
+
+<div class="calendar-wrapper">
+  <div class="weekdays">
+    <div class="weekday">Lun</div>
+    <div class="weekday">Mar</div>
+    <div class="weekday">Mié</div>
+    <div class="weekday">Jue</div>
+    <div class="weekday">Vie</div>
+    <div class="weekday weekend">Sáb</div>
+    <div class="weekday weekend">Dom</div>
+  </div>
+  <div class="days-grid" id="daysGrid"></div>
+</div>
+
+<div class="summary-strip">
+  <div class="summary-card sante">
+    <div class="summary-client">Santé — Entregables mensuales</div>
+    <ul class="summary-items">
+      <li><span class="dot"></span><span>Calendario editorial presentado antes del día 5</span></li>
+      <li><span class="dot"></span><span>Fecha de grabación propuesta con 7 días de anticipación mínimo</span></li>
+      <li><span class="dot"></span><span>1 día de grabación en clínica asociada (Santé provee locación y talentos)</span></li>
+      <li><span class="dot"></span><span>5 videos editados (Reels / TikTok / Stories)</span></li>
+      <li><span class="dot"></span><span>15 fotografías editadas</span></li>
+      <li><span class="dot"></span><span>Entrega máximo 10 días hábiles tras la sesión</span></li>
+      <li><span class="dot"></span><span>1 ronda de ajustes incluida por pieza</span></li>
+      <li><span class="dot"></span><span>Pago: 50% inicio de mes / 50% al entregar</span></li>
+    </ul>
+  </div>
+  <div class="summary-card ff">
+    <div class="summary-client">Friends & Family — Entregables mensuales</div>
+    <ul class="summary-items">
+      <li><span class="dot"></span><span>Plan de contenido interno aprobado antes de grabar</span></li>
+      <li><span class="dot"></span><span>1 día de rodaje (F&F gestiona modelos y locación)</span></li>
+      <li><span class="dot"></span><span>9 videos editados (Reels / TikTok / Stories)</span></li>
+      <li><span class="dot"></span><span>30 fotografías editadas en estudio</span></li>
+      <li><span class="dot"></span><span>Entrega progresiva durante el mes</span></li>
+      <li><span class="dot"></span><span>1 ronda de ajustes incluida por pieza</span></li>
+      <li><span class="dot"></span><span>Pago: 50% inicio de mes / 50% al entregar</span></li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">Defecto — crear para mover.</div>
+  <div class="footer-note">Uso interno · Coordinación de producción</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-date" id="modalDate"></div>
+        <div class="modal-title" id="modalTitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS_ES = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+
+let currentDate = new Date();
+let currentYear = currentDate.getFullYear();
+let currentMonth = currentDate.getMonth();
+
+// ─────────────────────────────────────────────────────────
+// EVENT DEFINITIONS — relative to month start (day 1 = 1)
+// ─────────────────────────────────────────────────────────
+function getEventsForMonth(year, month) {
+  const events = {};
+  const lastDay = new Date(year, month + 1, 0).getDate();
+
+  // Mayo 2026 es un mes especial: arranca el 6 (firma de Santé)
+  const isMayoEspecial = (year === 2026 && month === 4);
+  const START = isMayoEspecial ? 6 : 1;
+
+  function addEvent(day, event) {
+    const d = Math.round(day);
+    if (d < START || d < 1 || d > lastDay) return;
+    if (!events[d]) events[d] = [];
+    events[d].push(event);
+  }
+
+  function nthWeekdayFrom(startDay, weekday) {
+    // Find first occurrence of weekday on or after startDay
+    for (let d = startDay; d <= lastDay; d++) {
+      const dow = new Date(year, month, d).getDay() === 0 ? 7 : new Date(year, month, d).getDay();
+      if (dow === weekday) return d;
+    }
+    return null;
+  }
+
+  function nthWeekday(n, weekday) {
+    let count = 0;
+    for (let d = 1; d <= 31; d++) {
+      const date = new Date(year, month, d);
+      if (date.getMonth() !== month) break;
+      const dow = date.getDay() === 0 ? 7 : date.getDay();
+      if (dow === weekday) {
+        count++;
+        if (count === n) return d;
+      }
+    }
+    return null;
+  }
+
+  function addWorkingDays(fromDay, workingDays) {
+    let count = 0;
+    let d = fromDay;
+    while (count < workingDays) {
+      d++;
+      if (d > lastDay) return lastDay;
+      const dow = new Date(year, month, d).getDay();
+      if (dow !== 0 && dow !== 6) count++;
+    }
+    return d;
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // MAYO 2026 — MES ESPECIAL (arranca día 6)
+  // ═══════════════════════════════════════════════════════
+  if (isMayoEspecial) {
+
+    // DÍA 6 — Arranque: firma Santé + cobro inicial
+    addEvent(6, {
+      client: 'sante',
+      label: 'Firma contrato Santé ✓',
+      title: 'Firma de contrato — Santé',
+      desc: 'Firma oficial del contrato con Santé. A partir de hoy comienza el ciclo de producción de mayo. Camila asume la coordinación desde este día.'
+    });
+
+    addEvent(6, {
+      client: 'both',
+      label: 'Pago inicial 50% — ambos',
+      title: 'Cobro del 50% inicial — ambos clientes',
+      desc: 'Con la firma de Santé y el inicio del ciclo de mayo, se activa el cobro del 50% inicial de ambos clientes: Santé (USD 400) y Friends & Family (USD 325). Sin pago inicial no arranca la producción.'
+    });
+
+    // DÍAS 6–8 — Camila: planes de contenido
+    addEvent(6, {
+      client: 'ff',
+      label: 'Camila: plan F&F (urgente)',
+      title: 'Elaborar plan de contenido — Friends & Family',
+      desc: 'Camila empieza hoy el plan mensual de F&F. Mes comprimido: hay menos tiempo disponible. El plan debe estar listo en 2 días para no perder la ventana de rodaje.'
+    });
+
+    addEvent(6, {
+      client: 'sante',
+      label: 'Camila: calendario Santé (urgente)',
+      title: 'Elaborar calendario editorial — Santé',
+      desc: 'Camila comienza hoy el calendario editorial de Santé para mayo. Mes comprimido — debe estar listo en 2 días. Luca lo aprueba internamente.'
+    });
+
+    // DÍA 7 — Proponer fecha grabación Santé (con 7 días de anticipación al rodaje)
+    addEvent(7, {
+      client: 'sante',
+      label: 'Proponer fecha grabación Santé',
+      title: 'Proponer fecha de grabación — Santé',
+      desc: 'Camila propone hoy a Santé la fecha de grabación. Con 7 días mínimos de anticipación, el rodaje no puede ser antes del 14 de mayo. Santé tiene 48h para confirmar.'
+    });
+
+    // DÍA 8 — Límite planes internos
+    addEvent(8, {
+      client: 'both',
+      label: 'Límite: planes aprobados',
+      title: 'Límite — Planes de contenido aprobados (ambos clientes)',
+      desc: 'Fecha límite para tener aprobados internamente el plan de F&F y el calendario editorial de Santé. Sin esto aprobado, Camila no puede coordinar logística de rodajes.'
+    });
+
+    // DÍAS 10–11 — Rodaje F&F (sábado de la 2da semana, mes comprimido)
+    const primerSabadoDesde6 = nthWeekdayFrom(6, 6); // primer sábado desde día 6
+    const rodajeFF = primerSabadoDesde6 || 10;
+    addEvent(rodajeFF, {
+      client: 'ff',
+      label: 'Rodaje F&F (objetivo)',
+      title: 'Objetivo — Día de rodaje Friends & Family',
+      desc: 'Rodaje mensual de F&F. Mes comprimido: hay que grabar esta semana para tener tiempo de editar. F&F gestiona modelos y locación. Camila confirma todo previamente: actores, locación, hora.'
+    });
+
+    // DÍAS 14–16 — Rodaje Santé (mínimo 7 días después de propuesta día 7)
+    const rodajeSante = 14; // primer lunes hábil con 7 días desde propuesta
+    addEvent(rodajeSante, {
+      client: 'sante',
+      label: 'Rodaje Santé (objetivo)',
+      title: 'Objetivo — Día de grabación Santé',
+      desc: 'Sesión de grabación en clínica asociada. Santé provee locación y talentos. Equipo completo de Defecto en campo. Este es el primer rodaje con Santé — marcar el estándar de calidad.'
+    });
+
+    // Entrega Santé: 10 días hábiles tras rodaje día 14
+    const entregaSante = addWorkingDays(rodajeSante, 10);
+    addEvent(entregaSante, {
+      client: 'sante',
+      label: 'Límite entrega: Santé',
+      title: 'Límite de entrega — Santé',
+      desc: `5 videos y 15 fotografías editadas entregadas a Santé. Máximo 10 días hábiles tras la sesión del ${rodajeSante}/05. Santé tiene luego 5 días hábiles para revisar y pedir ajustes.`
+    });
+
+    // Entrega parcial F&F — mitad del tiempo restante
+    const entregaParcialFF = Math.min(rodajeFF + 5, 22);
+    addEvent(entregaParcialFF, {
+      client: 'ff',
+      label: 'Entrega parcial: F&F',
+      title: 'Entrega parcial — Friends & Family',
+      desc: 'Primera tanda de videos editados a F&F. Mes comprimido: entregar al menos 4–5 videos para feedback temprano y tener tiempo de ajustes antes de fin de mes.'
+    });
+
+    // DÍA 25 — Plan rodaje junio
+    addEvent(25, {
+      client: 'both',
+      label: 'Plan rodaje junio',
+      title: 'Límite — Plan de rodaje Junio',
+      desc: 'Camila cierra el plan de rodaje de junio antes del 25. Junio es el primer mes regular con ambos contratos activos. Propuesta de fechas, estructura de contenido y logística preliminar para los dos clientes.'
+    });
+
+    // DÍAS 28–29 — Entrega final F&F
+    addEvent(28, {
+      client: 'ff',
+      label: 'Entrega final: F&F',
+      title: 'Entrega final — Friends & Family',
+      desc: '9 videos y 30 fotografías completas entregadas a Friends & Family. Con la entrega se activa el cobro del 50% restante. Meta crítica para cerrar mayo limpio.'
+    });
+
+    // DÍA 31 — Cobro final
+    addEvent(31, {
+      client: 'both',
+      label: 'Cobro 50% restante',
+      title: 'Cobro del 50% restante — ambos clientes',
+      desc: 'Cierre de mayo. Con todo el contenido entregado y aprobado, se activa el cobro del 50% restante de ambos clientes. Camila confirma entregas completas antes de emitir el cobro.'
+    });
+
+  // ═══════════════════════════════════════════════════════
+  // MESES REGULARES (junio en adelante)
+  // ═══════════════════════════════════════════════════════
+  } else {
+
+    // DÍA 1 — Arranque
+    addEvent(1, {
+      client: 'both',
+      label: 'Pago inicial 50%',
+      title: 'Cobro del 50% inicial — ambos clientes',
+      desc: 'Inicio del ciclo de producción mensual. Santé y Friends & Family abonan el 50% antes de que arranque la producción.'
+    });
+
+    // DÍAS 2–5: planes de contenido
+    addEvent(2, {
+      client: 'ff',
+      label: 'Camila: plan F&F',
+      title: 'Elaborar plan de contenido — Friends & Family',
+      desc: 'Camila arma el plan mensual de F&F: ideas, referencias y estructura de los 9 videos. Revisión interna con Luca antes de grabar.'
+    });
+
+    addEvent(2, {
+      client: 'sante',
+      label: 'Camila: calendario Santé',
+      title: 'Elaborar calendario editorial — Santé',
+      desc: 'Camila prepara el calendario editorial de Santé: ideas de contenido, referencias visuales y criterio creativo. Listo antes del día 5.'
+    });
+
+    addEvent(3, {
+      client: 'sante',
+      label: 'Proponer fecha grabación Santé',
+      title: 'Proponer fecha de grabación — Santé',
+      desc: 'Camila propone a Santé la fecha de grabación con mínimo 7 días de anticipación. Santé tiene 48h para confirmar o proponer alternativa.'
+    });
+
+    addEvent(5, {
+      client: 'both',
+      label: 'Límite: planes aprobados',
+      title: 'Límite — Planes de contenido aprobados',
+      desc: 'Fecha límite para tener aprobados el calendario de Santé y el plan de F&F. Sin aprobación interna, Camila no avanza con logística.'
+    });
+
+    // SEMANA 1: rodaje F&F
+    const firstSat = nthWeekday(1, 6);
+    if (firstSat) {
+      addEvent(firstSat, {
+        client: 'ff',
+        label: 'Rodaje F&F (objetivo)',
+        title: 'Objetivo — Día de rodaje Friends & Family',
+        desc: 'Rodaje mensual de F&F en semana 1. F&F gestiona modelos y locación. Camila confirma todo previamente: actores, locación, hora.'
+      });
+    }
+
+    // SEMANA 2: rodaje Santé
+    const secMon = nthWeekday(2, 1);
+    if (secMon) {
+      addEvent(secMon, {
+        client: 'sante',
+        label: 'Rodaje Santé (objetivo)',
+        title: 'Objetivo — Día de grabación Santé',
+        desc: 'Sesión en clínica asociada. Santé provee locación y talentos. Equipo completo de Defecto en campo.'
+      });
+    }
+
+    // Entrega Santé: 10 días hábiles
+    const rodajeSanteDay = secMon || 10;
+    const entregaSante = addWorkingDays(rodajeSanteDay, 10);
+    addEvent(entregaSante, {
+      client: 'sante',
+      label: 'Límite entrega: Santé',
+      title: 'Límite de entrega — Santé',
+      desc: `5 videos y 15 fotografías entregadas a Santé. Máximo 10 días hábiles tras la sesión. Santé tiene 5 días hábiles para revisar.`
+    });
+
+    // Entregas parciales F&F
+    const firstMon = nthWeekday(1, 1);
+    const w2 = Math.min((firstMon || 6) + 7, lastDay);
+    addEvent(w2, {
+      client: 'ff',
+      label: 'Entrega parcial: F&F',
+      title: 'Entrega parcial — Friends & Family',
+      desc: 'Primera tanda: al menos 3–4 videos listos. Feedback temprano para ajustes antes de fin de mes.'
+    });
+
+    const w3 = Math.min((firstMon || 6) + 14, lastDay);
+    addEvent(w3, {
+      client: 'ff',
+      label: 'Entrega parcial: F&F',
+      title: 'Segunda entrega parcial — Friends & Family',
+      desc: 'Segunda tanda: 6–7 videos y avance en fotos. Camila consolida feedback y coordina ajustes.'
+    });
+
+    // DÍA 25
+    addEvent(25, {
+      client: 'both',
+      label: 'Plan rodaje mes siguiente',
+      title: 'Límite — Plan de rodaje mes siguiente',
+      desc: 'Camila cierra el plan del mes siguiente antes del 25. Propuesta de fechas, contenido y logística preliminar para ambos clientes.'
+    });
+
+    // Entrega final F&F
+    addEvent(lastDay - 1, {
+      client: 'ff',
+      label: 'Entrega final: F&F',
+      title: 'Entrega final — Friends & Family',
+      desc: '9 videos y 30 fotografías completas entregadas. Se activa cobro del 50% restante.'
+    });
+
+    // Cobro final
+    addEvent(lastDay, {
+      client: 'both',
+      label: 'Cobro 50% restante',
+      title: 'Cobro del 50% restante — ambos clientes',
+      desc: 'Con todo entregado y aprobado, se activa el cobro del 50% restante de ambos clientes.'
+    });
+  }
+
+  return events;
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER CALENDAR
+// ─────────────────────────────────────────────────────────
+function renderCalendar() {
+  const grid = document.getElementById('daysGrid');
+  grid.innerHTML = '';
+
+  document.getElementById('monthLabel').textContent =
+    `${MONTHS_ES[currentMonth]} ${currentYear}`;
+
+  // Banner especial mayo 2026
+  const banner = document.getElementById('mayBanner');
+  if (currentYear === 2026 && currentMonth === 4) {
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  const events = getEventsForMonth(currentYear, currentMonth);
+  const today = new Date();
+
+  // First day of month
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  // Day of week: 0=Sun, convert to Mon-first
+  let startDow = firstDay.getDay();
+  if (startDow === 0) startDow = 7;
+  const offset = startDow - 1; // cells before day 1
+
+  const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevLastDay = new Date(currentYear, currentMonth, 0).getDate();
+
+  const totalCells = Math.ceil((offset + lastDay) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+
+    let dayNum, isOtherMonth = false;
+    if (i < offset) {
+      dayNum = prevLastDay - offset + i + 1;
+      isOtherMonth = true;
+      cell.classList.add('other-month');
+    } else if (i >= offset + lastDay) {
+      dayNum = i - offset - lastDay + 1;
+      isOtherMonth = true;
+      cell.classList.add('other-month');
+    } else {
+      dayNum = i - offset + 1;
+    }
+
+    // Weekend (Sat=6, Sun=0 in 0-based from Monday)
+    const colIndex = i % 7; // 0=Mon..6=Sun
+    if (colIndex >= 5) cell.classList.add('weekend');
+
+    // Today
+    if (!isOtherMonth &&
+        dayNum === today.getDate() &&
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear()) {
+      cell.classList.add('today');
+    }
+
+    // Mayo 2026: días 1–5 fuera del ciclo
+    const isMayoEspecial = (currentYear === 2026 && currentMonth === 4);
+    if (isMayoEspecial && !isOtherMonth && dayNum < 6) {
+      cell.classList.add('other-month');
+      cell.style.opacity = '0.25';
+      const lock = document.createElement('div');
+      lock.style.cssText = 'font-size:9px;color:rgba(255,255,255,0.2);margin-top:4px;letter-spacing:0.05em;';
+      lock.textContent = 'pre-arranque';
+      cell.appendChild(lock);
+    }
+
+    const numEl = document.createElement('div');
+    numEl.className = 'day-number';
+    numEl.textContent = dayNum;
+    cell.appendChild(numEl);
+
+    // Events
+    if (!isOtherMonth && events[dayNum]) {
+      cell.classList.add('has-events');
+      const dayEvents = events[dayNum];
+
+      // Show max 2 chips, indicate overflow
+      const shown = dayEvents.slice(0, 2);
+      shown.forEach(ev => {
+        const chip = document.createElement('span');
+        chip.className = `event-chip chip-${ev.client}`;
+        chip.textContent = ev.label;
+        cell.appendChild(chip);
+      });
+
+      if (dayEvents.length > 2) {
+        const more = document.createElement('span');
+        more.className = 'event-chip chip-internal';
+        more.textContent = `+${dayEvents.length - 2} más`;
+        cell.appendChild(more);
+      }
+
+      cell.addEventListener('click', () => openModal(dayNum, dayEvents));
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────
+function openModal(day, events) {
+  const dateStr = `${day} de ${MONTHS_ES[currentMonth]} ${currentYear}`;
+  document.getElementById('modalDate').textContent = dateStr;
+  document.getElementById('modalTitle').textContent =
+    events.length === 1 ? events[0].title : `${events.length} hitos este día`;
+
+  const body = document.getElementById('modalBody');
+  body.innerHTML = '';
+
+  events.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = `modal-event ${ev.client}`;
+
+    const clientLabel = {
+      sante: 'Santé',
+      ff: 'Friends & Family',
+      both: 'Ambos clientes',
+      internal: 'Interno'
+    }[ev.client];
+
+    div.innerHTML = `
+      <div class="modal-event-client">${clientLabel}</div>
+      <div class="modal-event-title">${ev.title}</div>
+      <div class="modal-event-desc">${ev.desc}</div>
+    `;
+    body.appendChild(div);
+  });
+
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderCalendar();
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModalDirect();
+});
+
+// Init
+renderCalendar();
+</script>
+</body>
+</html>
